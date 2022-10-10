@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="d-flex justify-content-center">
+{% autoescape off %}
+    {{ plot_conv }}
+{% endautoescape %}
+</div>
+
+<div class="d-flex justify-content-center">
+{% autoescape off %}
+    {{ plot_mn }}
+{% endautoescape %}
+</div>
+
+{% endblock content %}

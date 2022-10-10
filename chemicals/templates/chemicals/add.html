@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="row">
+  <div class="col"></div>
+  <div class="col-5">
+  <div class="display-5 mb-4 text-center">Search online</div>
+        <form method="post" id="add_chemical_form" novalidate>
+            {% csrf_token %}
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" id="search_query" placeholder="Search..."/>
+                <button type="submit" class="btn btn-primary bi-search"> </button>
+            </div>
+        </form>
+        <hr />
+        <form method="post" action="{% url 'add_chemical' %}" novalidate>
+            {% csrf_token %}
+
+            <div class="form-floating mb-3">
+            {% render_field form.iupac class="form-control" id=form.iupac.id_for_label %}
+            <label for="{{ form.iupac.id_for_label }}">IUPAC name</label>
+            <div class="text-danger ms-2 small">{% for error in form.iupac.errors %} {{ error }} {% endfor %}</div>
+            </div>
+
+            <div class="form-floating mb-3">
+            {% render_field form.common_name class="form-control" id=form.common_name.id_for_label %}
+            <label for="{{ form.common_name.id_for_label }}">Common name</label>
+            <div class="text-danger ms-2 small">{% for error in form.common_name.errors %} {{ error }} {% endfor %}</div>
+            </div>
+
+            <div class="form-floating mb-3">
+            {% render_field form.abbreviation class="form-control" id=form.abbreviation.id_for_label %}
+            <label for="{{ form.abbreviation.id_for_label }}">Abbreviation</label>
+            <div class="text-danger ms-2 small">{% for error in form.abbreviation.errors %} {{ error }} {% endfor %}</div>
+            </div>
+
+            <div class="form-floating mb-3">
+            {% render_field form.other_names class="form-control select2" id=form.other_names.id_for_label %}
+            <label for="{{ form.other_names.id_for_label }}">Other names</label>
+            <div class="text-danger ms-2 small">{% for error in form.other_names.errors %} {{ error }} {% endfor %}</div>
+            </div>
+
+            <hr />
+
+            <div class="form-floating mb-3">
+            {% render_field form.inchi class="form-control" id=form.inchi.id_for_label %}
+            <label for="{{ form.inchi.id_for_label }}">InChI</label>
+            <div class="text-danger ms-2 small">{% for error in form.inchi.errors %} {{ error }} {% endfor %}</div>
+            </div>
+
+            <div class="form-floating mb-3">
+            {% render_field form.inchi_key class="form-control" id=form.inchi_key.id_for_label %}
+            <label for="{{ form.inchi_key.id_for_label }}">InChIKey</label>
+            <div class="text-danger ms-2 small">{% for error in form.inchi_key.errors %} {{ error }} {% endfor %}</div>
+            </div>
+
+            <div class="form-floating mb-3">
+            {% render_field form.mw class="form-control" id=form.mw.id_for_label %}
+            <label for="{{ form.mw.id_for_label }}">Molecular weight (g/mol)</label>
+            <div class="text-danger ms-2 small">{% for error in form.mw.errors %} {{ error }} {% endfor %}</div>
+            </div>
+
+            <hr />
+
+            <div class="form-floating mb-3">
+            {% render_field form.cas class="form-control select2" id=form.cas.id_for_label %}
+            <label for="{{ form.cas.id_for_label }}">CAS</label>
+            <div class="text-danger ms-2 small">{% for error in form.cas.errors %} {{ error }} {% endfor %}</div>
+            </div>
+
+            <div class="form-floating mb-3">
+            {% render_field form.smiles class="form-control select2" id=form.smiles.id_for_label %}
+            <label for="{{ form.smiles.id_for_label }}">SMILES</label>
+            <div class="text-danger ms-2 small">{% for error in form.smiles.errors %} {{ error }} {% endfor %}</div>
+            </div>
+
+            <div class="mb-3">
+                <button type="submit" name="save_changes" class="btn btn-primary me-3 col-sm-4">Create chemical</button>
+                <button type="reset" class="btn btn-outline-secondary col-sm-4">Cancel</button>
+            </div>
+        </form>
+  </div>
+  <div class="col"></div>
+</div>
+{% endblock content %}
+
+{% block scripts %}
+
+<script src="{% static 'js/csrf.js' %}"></script>
+
+<script>
+    //initialise the select2 library for fields with select2 class
+    $(document).ready(function() {
+        $('.select2').select2();
+    });
+
+    //keep the select2 box closed when removing a value from the box
+    $("select").select2({
+        allowClear: true
+    }).on("select2:unselecting", function(e) {
+        $(this).data('state', 'unselected');
+    }).on("select2:open", function(e) {
+        if ($(this).data('state') === 'unselected') {
+            $(this).removeData('state'); 
+
+            var self = $(this);
+            setTimeout(function() {
+                self.select2('close');
+            }, 1);
+        }    
+    });
+
+    $('#add_chemical_form').on('submit', function(event){
+        console.log("Searching...")
+        event.preventDefault();
+        search_inchi();
+        search_inchikey();
+        search_mw();
+        search_cas();
+        search_smiles();
+        search_iupac();
+        search_names();
+    });
+
+    function search_inchi() {
+        $.ajax({
+            url : "https://cactus.nci.nih.gov/chemical/structure/" + $('#search_query').val() + "/stdinchi",
+            type : "POST",
+            dataType: "text",
+            data : { foo: 'test' },
+
+            success : function(text) {
+                document.getElementById('{{form.inchi.id_for_label}}').value=text.slice(6);
+            },
+
+            error : function(xhr,errmsg, err) {
+                console.log(xhr.status + ": " + xhr.responseText);
+            }
+
+        });
+    }
+
+    function search_inchikey() {
+        $.ajax({
+            url : "https://cactus.nci.nih.gov/chemical/structure/" + $('#search_query').val() + "/stdinchikey",
+            type : "POST",
+            dataType: "text",
+            
+            success : function(text) {
+                document.getElementById('{{form.inchi_key.id_for_label}}').value=text.slice(9);
+            },
+
+            error : function(xhr,errmsg, err) {
+                console.log(xhr.status + ": " + xhr.responseText);
+            }
+
+        });
+    }
+
+    function search_mw() {
+        $.ajax({
+            url : "https://cactus.nci.nih.gov/chemical/structure/" + $('#search_query').val() + "/mw",
+            type : "POST",
+            dataType: "text",
+            data : { foo: 'test' },
+
+            success : function(text) {
+                document.getElementById('{{form.mw.id_for_label}}').value=text;
+            },
+
+            error : function(xhr,errmsg, err) {
+                console.log(xhr.status + ": " + xhr.responseText);
+            }
+
+        });
+    }
+
+    function search_iupac() {
+        $.ajax({
+            url : "https://cactus.nci.nih.gov/chemical/structure/" + $('#search_query').val() + "/iupac_name",
+            type : "POST",
+            dataType: "text",
+            data : { foo: 'test' },
+
+            success : function(text) {
+                document.getElementById('{{form.iupac.id_for_label}}').value=text;
+            },
+
+            error : function(xhr,errmsg, err) {
+                console.log(xhr.status + ": " + xhr.responseText);
+            }
+
+        });
+    }
+
+    function search_names() {
+        $.ajax({
+            url : "https://cactus.nci.nih.gov/chemical/structure/" + $('#search_query').val() + "/names",
+            type : "POST",
+            dataType: "text",
+            data : { foo: 'test' },
+
+            success : function(text) {
+                var data = text.split('\n').slice(0, 15); //only take first 15 items for now, write filter later
+                for (var nr in data) {
+                    var newOption = new Option(data[nr], data[nr], true, true);
+                    $('#{{form.other_names.id_for_label}}').append(newOption).trigger('change');
+                }
+            },
+
+            error : function(xhr,errmsg, err) {
+                console.log(xhr.status + ": " + xhr.responseText);
+            }
+
+        });
+    }
+
+        function search_cas() {
+        $.ajax({
+            url : "https://cactus.nci.nih.gov/chemical/structure/" + $('#search_query').val() + "/cas",
+            type : "POST",
+            dataType: "text",
+            data : { foo: 'test' },
+
+            success : function(text) {
+                var data = text.split('\n');
+                for (var nr in data) {
+                    var newOption = new Option(data[nr], data[nr], true, true);
+                    $('#{{form.cas.id_for_label}}').append(newOption).trigger('change');
+                }
+            },
+
+            error : function(xhr,errmsg, err) {
+                console.log(xhr.status + ": " + xhr.responseText);
+            }
+
+        });
+    }
+
+    function search_smiles() {
+        $.ajax({
+            url : "https://cactus.nci.nih.gov/chemical/structure/" + $('#search_query').val() + "/smiles",
+            type : "POST",
+            dataType: "text",
+            data : { foo: 'test' },
+
+            success : function(text) {
+                var newOption = new Option(text, text, true, true);
+                $('#{{form.smiles.id_for_label}}').append(newOption).trigger('change');
+            },
+
+            error : function(xhr,errmsg, err) {
+                console.log(xhr.status + ": " + xhr.responseText);
+            }
+
+        });
+    }
+
+</script>
+
+{% endblock scripts %}

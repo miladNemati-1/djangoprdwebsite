@@ -1,0 +1,1 @@
+A confirmation e-mail sent to {{email}}. Check your mailbox to verify your e-mail address.

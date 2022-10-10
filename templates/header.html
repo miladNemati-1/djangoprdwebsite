@@ -1,0 +1,44 @@
+<header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-2 mb-4 border-bottom">
+    <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
+        <li> <a href={% url 'home' %} class="nav-link px-3 link-dark">Home</a> </li>
+        <li> <a href={% url 'search_chemicals' %} class="nav-link px-3 link-dark">Chemicals</a> </li>
+        <li>
+            <div class="dropdown-center me-2">
+                <a class="btn dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                    My lab
+                </a>
+
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuLink">
+                    <li><a class="dropdown-item" href={% url 'my_experiments' %}>Experiments</a></li>
+                    <li><a class="dropdown-item" href={% url 'my_chemicals' %}>Inventory</a></li>
+                    <li><a class="dropdown-item" href={% url 'my_equipment' %}>Equipment</a></li>
+                </ul>
+            </div>
+        </li>
+        {% if user.is_staff %}
+            <li> <a href={% url 'admin:index' %} class="nav-link px-3 link-dark">Admin</a> </li>
+        {% endif %}
+    </ul>
+
+        <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0 text-end">
+        {% if user.is_authenticated %}
+        <li>
+            <div class="dropdown me-2">
+                <a class="btn dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                    My account
+                </a>
+
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuLink">
+                    <li><a class="dropdown-item" href={% url 'my_account' %}>Personal info</a></li>
+                    <li><a class="dropdown-item" href={% url 'account_email' %}>Manage email</a></li>
+                    <li><a class="dropdown-item" href={% url 'account_change_password' %}>Change password</a></li>
+                </ul>
+            </div>
+        </li>
+        <li>{% include "account/logout.html" %}</li>
+        {% else %}
+        <li><a class="btn btn-outline-success me-2" href={% url 'account_signup' %}>Sign Up</a></li>
+        <li><a class="btn btn-primary" href={% url 'account_login' %}>Log In</a></li>
+        {% endif %}
+    </ul>
+</header>

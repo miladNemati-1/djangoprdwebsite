@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="row">
+  <div class="col"></div>
+  <div class="col-5">
+  <div class="display-5 mb-4">Create research group</div>
+    <form method="post" action="{% url 'create_group' %}" novalidate>
+    {% csrf_token %}
+
+    <div class="form-floating mb-3">
+      {% render_field form_group.name class="form-control" id=form_group.name.id_for_label %}
+      <label for="{{ form_group.name.id_for_label }}">Group name</label>
+      <div class="text-danger ms-2 small">{% for error in form_group.name.errors %} {{ error }} {% endfor %}</div>
+    </div>
+
+    <div class="form-floating mb-3">
+      {% render_field form_group.short_name class="form-control" id=form_group.short_name.id_for_label %}
+      <label for="{{ form_group.short_name.id_for_label }}">Short name</label>
+      <div class="text-danger ms-2 small">{% for error in form_group.short_name.errors %} {{ error }} {% endfor %}</div>
+    </div>
+
+    <div class="mb-3">
+      <label for="{{ form_group.is_private.id_for_label }}" class="form-label ms-2 me-2">{{ form_group.is_private.label }}</label>
+      {% render_field form_group.is_private %}
+      <div class="ms-2 small">Setting your group as private will only show the group leader(s) on the group page. This setting can be changed later.</div>
+    </div>
+
+    <hr />
+
+    <div class="display-6 mb-4">Research institution</div>
+
+    <div class="form-floating mb-2">
+      {% render_field form_institution.institution class="form-control" id=form_institution.institution.id_for_label %}
+    </div>
+
+    <div class="text-center mb-2">or</div>
+
+    <div class="form-floating mb-3">
+      {% render_field form_institution.name class="form-control" id=form_institution.name.id_for_label %}
+      <label for="{{ form_institution.name.id_for_label }}">Name</label>
+      <div class="text-danger ms-2 small">{% for error in form_institution.name.errors %} {{ error }} {% endfor %}</div>
+    </div>
+
+    <div class="form-floating mb-3">
+      {% render_field form_institution.short_name class="form-control" id=form_institution.short_name.id_for_label %}
+      <label for="{{ form_institution.short_name.id_for_label }}">Short name</label>
+      <div class="text-danger ms-2 small">{% for error in form_institution.name.errors %} {{ error }} {% endfor %}</div>
+    </div>
+
+    <div class="form-floating mb-3">
+      {% render_field form_institution.country class="form-control" id=form_institution.country.id_for_label %}
+      <label for="{{ form_institution.country.id_for_label }}">Country</label>
+      <div class="text-danger ms-2 small">{% for error in form_institution.country.errors %} {{ error }} {% endfor %}</div>
+    </div>
+
+    <div class="ms-2 mb-3 small">If your research group is part of multiple institutions, you can add those later in the group settings.</div>
+
+    <div class="mb-3">
+      <button type="submit" name="save_changes" class="btn btn-primary me-3 col-sm-4">Create Group</button>
+      <button type="reset" class="btn btn-outline-secondary col-sm-4">Cancel</button>
+    </div>
+  </form>
+  </div>
+  <div class="col"></div>
+</div>
+{% endblock content %}
+
+{% block scripts %}
+
+<script>
+  $(document).ready(function(){
+    $("#{{form_institution.institution.id_for_label}}").select2({
+      placeholder: "Search Institutions",
+      allowClear: true
+    });
+  }); 
+
+  $('#{{form_institution.institution.id_for_label}}').on('select2:select', function (e) {
+    var data = e.params.data.id;
+    $.ajax({
+      url: 'ajax',
+      data: {
+        'pk': data
+      },
+      dataType: 'json',
+      success: function (data) {
+        document.getElementById('{{form_institution.name.id_for_label}}').value=data.name;
+        document.getElementById('{{form_institution.name.id_for_label}}').readOnly=true;
+        document.getElementById('{{form_institution.short_name.id_for_label}}').value=data.short_name;
+        document.getElementById('{{form_institution.short_name.id_for_label}}').readOnly=true;
+        document.getElementById('{{form_institution.country.id_for_label}}').value=data.country;
+        document.getElementById('{{form_institution.country.id_for_label}}').disabled=true;
+      }
+    })
+  });
+
+  $('#{{form_institution.institution.id_for_label}}').on('select2:clear', function (e) {
+    document.getElementById('{{form_institution.name.id_for_label}}').value="";
+    document.getElementById('{{form_institution.name.id_for_label}}').readOnly=false;
+    document.getElementById('{{form_institution.short_name.id_for_label}}').value="";
+    document.getElementById('{{form_institution.short_name.id_for_label}}').readOnly=false;
+    document.getElementById('{{form_institution.country.id_for_label}}').value=0;
+    document.getElementById('{{form_institution.country.id_for_label}}').disabled=false;
+  });
+</script>
+
+{% endblock scripts %}

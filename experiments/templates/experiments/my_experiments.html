@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% load render_table from django_tables2 %}
+
+{% block content %}
+<div class="row">
+    <div class="col"></div>
+    <div class="col-8">
+        <div class="display-5 mb-4">My experiments</div>
+        {% if experiments %}
+            {% render_table experiments %}
+        {% else %}
+            <p>You don't have any experiments logged. You can do so below</p>
+        {% endif %}
+        <div class='text-center mb-4 mt-3'>
+            <a href={% url 'add_experiment' %} class='link-primary text-decoration-none'>
+                <strong>Add a new experiment. For science!</strong>
+            </a>
+        </div>
+    </div>
+    <div class="col"></div>
+</div>
+{% endblock content %}

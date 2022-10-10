@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% load widget_tweaks %}
+
+{% block content %}
+  <div class="row">
+    <div class="col"></div>
+    <div class="col-4">
+      <div class="display-1 text-center mb-4">MoMoDa</div>
+      <form method="post" action="{% url 'account_login' %}">
+        {% csrf_token %}
+        <div class="mb-2">
+          {% render_field form.login class="col-sm-12 form-control form-control-lg" %}
+        </div>
+        <div class="mb-3">
+          {% render_field form.password class="col-sm-12 form-control form-control-lg" %}
+        </div>
+        <div class="mb-3">
+          <button type="submit" class="btn btn-primary btn-lg col-sm-12">Log In</button>
+        </div>
+      </form>
+      <div class="text-center mb-4"> 
+        <a href={% url 'account_reset_password' %} class="link-primary text-decoration-none">
+          <strong>Forgotten password?</strong>
+        </a>
+      </div>
+      <hr />
+      <div class="text-center"> 
+        <a href={% url 'account_signup' %} class="link-success text-decoration-none">
+          <strong>Don't have an account yet? Sign up here!</strong>
+        </a>
+      </div>
+    </div>
+    <div class="col"></div>
+  </div>
+{% endblock content %}

@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% load widget_tweaks %}
+{% load render_table from django_tables2 %}
+
+{% block content %}
+<div class="row">
+    <div class="col"></div>
+    <div class="col-8">
+        <div class="display-5 mb-1">{{experiment.name}}</div>
+        <div class="fs-4 ms-4 text-secondary">- {{experiment.user}}</div>
+        <div>Temperature: {{experiment.temperature}} ºC<br />Volume: {{experiment.total_volume}} ml</div>
+        {% if supplies %}
+            {% render_table supplies %}
+        {% endif %}
+        <form method="post" action="{% url 'experiment_detail' pk %}" novalidate>
+            {% csrf_token %}
+
+            <div class="row mb-3">
+                <div class="col-7">
+                    {% render_field form.experiment id=form.experiment.id_for_label hidden=True %}
+                    {% render_field form.inventory class="form-control select2" id=form.inventory.id_for_label %}
+                    <div class="text-danger ms-2 small">{% for error in form.inventory.errors %} {{ error }} {% endfor %}</div>
+                </div>
+                <div class="col-2">
+                    {% render_field form.type class="form-control" id=form.type.id_for_label %}
+                    <div class="text-danger ms-2 small">{% for error in form.type.errors %} {{ error }} {% endfor %}</div>
+                </div>
+                <div class="col-2">
+                    {% render_field form.molarity class="form-control" id=form.molarity.id_for_label %}
+                    <div class="text-danger ms-2 small">{% for error in form.molarity.errors %} {{ error }} {% endfor %}</div>
+                </div>
+            </div>
+            <div class="mb-5">
+                <button type="submit" name="save_changes" class="btn btn-primary me-3 col-sm-4">Add chemical</button>
+            </div>
+        </form>
+        <div class="display-5 mt-5 mb-1">Data files</div>
+        {% if files_list %}
+            {% render_table files_list %}
+        {% endif %}
+        <div class="display-6 mt-3 mb-3">Upload file</div>
+        <form method="post" action="{% url 'upload_file' pk %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% render_field file_form.experiment id=file_form.experiment.id_for_label hidden=True %}
+            {% render_field file_form.is_approved id=file_form.experiment.is_approved hidden=True %}
+            <div class="form-floating mb-3">
+                {% render_field file_form.device class="form-control" id=file_form.device.id_for_label %}
+                <label for="{{ file_form.device.id_for_label }}">Device</label>
+                <div class="text-danger ms-2 small">{% for error in file_form.device.errors %} {{ error }} {% endfor %}</div>
+            </div>
+            <div class="custom-file mb-3">
+                {% render_field file_form.file class="form-control custom-file-input" id=file_form.file.id_for_label%}
+                <div class="text-danger ms-2 small">{% for error in file_form.file.errors %} {{ error }} {% endfor %}</div>
+            </div>
+            <button type="submit" class="btn btn-success mb-3">Upload file</button>
+        </form>
+    </div>
+    <div class="col"></div>
+</div>
+{% endblock content %}
+
+{% block scripts %}
+
+<script>
+    //initialise the select2 library for fields with select2 class
+    $(document).ready(function() {
+        $('.select2').select2({
+            theme: 'bootstrap4',
+        });
+    });
+</script>
+
+{% endblock scripts %}

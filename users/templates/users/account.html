@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="row">
+  <div class="col"></div>
+  <div class="col-5">
+  <div class="display-5 mb-3">Contact details</div>
+  <form method="post" action="{% url 'my_account' %}" novalidate>
+    {% csrf_token %}
+    <div class="row mb-3">
+      <div class="col">
+        <label for="{{ form.first_name.id_for_label }}" class="form-label ms-2">{{ form.first_name.label }}</label>
+          {% render_field form.first_name class="form-control" %}
+          <div class="text-danger ms-2 small">{% for error in form.first_name.errors %} {{ error }} {% endfor %}</div>
+      </div>
+      <div class="col">
+        <label for="{{ form.last_name.id_for_label }}" class="form-label ms-2">{{ form.last_name.label }}</label>
+        {% render_field form.last_name class="form-control" %}
+        <div class="text-danger ms-2 small">{% for error in form.last_name.errors %} {{ error }} {% endfor %}</div>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label for="{{ form.email.id_for_label }}" class="form-label ms-2">{{ form.email.label }}</label>
+      {% render_field form.email class="form-control" readonly="true" %}
+      <div class="text-danger ms-2 small">{% for error in form.email.errors %} {{ error }} {% endfor %}</div>
+    </div>
+
+    <div class="mb-4">
+      <label for="{{ form.orcid.id_for_label }}" class="form-label ms-2">{{ form.orcid.label }}</label>
+      {% render_field form.orcid class="form-control" %}
+      <div class="text-danger ms-2 small">{% for error in form.orcid.errors %} {{ error }} {% endfor %}</div>
+    </div>
+
+    <div>
+      <button type="submit" name="save_changes" class="btn btn-primary me-3 col-sm-4">Save Changes</button>
+      <button type="reset" class="btn btn-outline-secondary col-sm-4">Cancel</button>
+    </div>
+  </form>
+  <div class="display-5 mt-4 mb-3">Research group{% if not research_group.count == 1 %}s{% endif %}</div>
+  {% if groups %}
+    {% for group in groups%}
+      <div class="card mb-2">
+        <div class="card-body">
+          <div class="mb-1">
+            {% if group.is_leader %}<a class="text-success text-decoration-none"><strong>Group Leader: </strong></a>{% endif %}
+            <a href={% url 'research_group' group.group.id%} class="text-dark text-decoration-none stretched-link">{{group.group.name}} ({{group.group.short_name}})</a>
+          </div>
+          {% for location in group.group.institution_set.all %}
+            <div class="ms-3 text-secondary">{{location}}</div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>You are not part of any research groups.<br />Ask your group leader for an invite or create one below.</p>
+  {% endif %}
+  <a class="btn btn-primary mb-3 col-sm-4" href={% url 'create_group' %}>Create group</a>
+  </div>
+  <div class="col"></div>
+</div>
+{% endblock content %}

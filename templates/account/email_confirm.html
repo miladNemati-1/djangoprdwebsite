@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="row">
+        <div class="col"></div>
+        <div class="col-6">
+            <div class="display-5 text-center mb-4">{% if confirmation %}Confirm e-mail address{% else %}Link expired or invalid{% endif %}</div>
+            {% if confirmation %}
+            <p>Please confirm that {{ confirmation.email_address.email }} is an e-mail address for {{ confirmation.email_address.user }}</p>
+            <form method="post" action="{% url 'account_confirm_email' confirmation.key %}">
+                {% csrf_token %}
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary col-4">Confirm</button>
+                </div>
+            </form>
+            {% else %}
+            <p>Please <a href="{% url 'account_email' %}">issue a new e-mail confirmation request</a> or try to log in again.</p>
+            {% endif %}
+        </div>
+        <div class="col"></div>
+    </div>
+{% endblock content %}

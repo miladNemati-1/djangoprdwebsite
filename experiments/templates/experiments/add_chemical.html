@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="row">
+    <div class="col"></div>
+    <div class="col-5">
+        <div class="display-5 mb-4">Add to inventory</div>
+        <form method="post" action="{% url 'add_supplier' %}" novalidate>
+            {% csrf_token %}
+
+            <div class="form-floating mb-3">
+            {% render_field form.inchi class="form-control" id=form.inchi.id_for_label %}
+            <label for="{{ form.inchi.id_for_label }}">Name</label>
+            <div class="text-danger ms-2 small">{% for error in form.inchi.errors %} {{ error }} {% endfor %}</div>
+            </div>
+
+            <div class="ms-2 small">If your chemical is made in your own lab, choose "N/A" below</div>
+            <div class="form-floating mb-3">
+            {% render_field form.company class="form-control" id=form.company.id_for_label %}
+            <label for="{{ form.company.id_for_label }}">Company</label>
+            <div class="text-danger ms-2 small">{% for error in form.company.errors %} {{ error }} {% endfor %}</div>
+            </div>
+
+            <div class="form-floating mb-3">
+            {% render_field form.purity class="form-control" id=form.purity.id_for_label %}
+            <label for="{{ form.purity.id_for_label }}">Purity</label>
+            <div class="text-danger ms-2 small">{% for error in form.purity.errors %} {{ error }} {% endfor %}</div>
+            </div>
+
+            <div class="form-floating mb-3">
+            {% render_field form.group class="form-control" id=form.group.id_for_label %}
+            <label for="{{ form.group.id_for_label }}">Group</label>
+            <div class="text-danger ms-2 small">{% for error in form.group.errors %} {{ error }} {% endfor %}</div>
+            </div>
+
+            <div class="form-floating mb-3">
+            {% render_field form.url class="form-control" id=form.url.id_for_label %}
+            <label for="{{ form.url.id_for_label }}">URL</label>
+            <div class="text-danger ms-2 small">{% for error in form.url.errors %} {{ error }} {% endfor %}</div>
+            </div>
+
+            <div class="form-floating mb-3">
+            {% render_field form.extra_info class="form-control" id=form.extra_info.id_for_label %}
+            <label for="{{ form.extra_info.id_for_label }}">Extra Info</label>
+            <div class="text-danger ms-2 small">{% for error in form.extra_info.errors %} {{ error }} {% endfor %}</div>
+            </div>
+
+            <div class="mb-3 text-center">
+                <button type="submit" name="save_changes" class="btn btn-primary me-3 col-sm-4">Save chemical</button>
+                <button type="reset" class="btn btn-outline-secondary col-sm-4">Cancel</button>
+            </div>
+        </form>
+    </div>
+    <div class="col"></div>
+</div>
+{% endblock content %}
+
+{% block scripts %}
+
+<script>
+    //initialise the select2 library for fields with select2 class
+    $(document).ready(function() {
+        $('.select2').select2();
+    });
+</script>
+
+{% endblock scripts %}

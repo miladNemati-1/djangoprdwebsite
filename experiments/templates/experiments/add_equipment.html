@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="row">
+    <div class="col"></div>
+    <div class="col-5">
+        <div class="display-5 mb-4">Add equipment</div>
+        <form method="post" action="{% url 'add_equipment' %}" novalidate>
+            {% csrf_token %}
+
+            <div class="form-floating mb-3">
+            {% render_field form.name class="form-control" id=form.name.id_for_label %}
+            <label for="{{ form.name.id_for_label }}">Name</label>
+            <div class="text-danger ms-2 small">{% for error in form.name.errors %} {{ error }} {% endfor %}</div>
+            </div>
+
+            <div class="form-floating mb-3">
+            {% render_field form.volume class="form-control" id=form.volume.id_for_label %}
+            <label for="{{ form.volume.id_for_label }}">Volume (ml)</label>
+            <div class="text-danger ms-2 small">{% for error in form.volume.errors %} {{ error }} {% endfor %}</div>
+            </div>
+
+            <div class="form-floating mb-3">
+            {% render_field form.type class="form-control" id=form.type.id_for_label %}
+            <label for="{{ form.type.id_for_label }}">Type</label>
+            <div class="text-danger ms-2 small">{% for error in form.type.errors %} {{ error }} {% endfor %}</div>
+            </div>
+
+            <div class="form-floating mb-3">
+            {% render_field form.group class="form-control" id=form.group.id_for_label %}
+            <label for="{{ form.group.id_for_label }}">Group</label>
+            <div class="text-danger ms-2 small">{% for error in form.group.errors %} {{ error }} {% endfor %}</div>
+            </div>
+
+            <div class="mb-3 text-center">
+                <button type="submit" name="save_changes" class="btn btn-primary me-3 col-sm-4">Save equipment</button>
+                <button type="reset" class="btn btn-outline-secondary col-sm-4">Cancel</button>
+            </div>
+        </form>
+    </div>
+    <div class="col"></div>
+</div>
+{% endblock content %}

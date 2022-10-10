@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% load render_table from django_tables2 %}
+
+{% block content %}
+<div class="row">
+    <div class="col"></div>
+    <div class="col-8">
+        <div class="display-5 mb-4">My equipment</div>
+        {% if equipment %}
+            {% render_table equipment %}
+        {% else %}
+            <p>You don't have any equipment registered. You can do so <a>here</a></p>
+        {% endif %}
+        <div class='text-center mb-4 mt-3'>
+            <a href={% url 'add_equipment' %} class='link-primary text-decoration-none'>
+                <strong>Got a fancy new setup? Add it here!</strong>
+            </a>
+        </div>
+    </div>
+    <div class="col"></div>
+</div>
+{% endblock content %}

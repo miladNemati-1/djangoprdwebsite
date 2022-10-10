@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="row">
+    <div class="col"></div>
+    <div class="col-5">
+        <div class="display-5 mb-4">Add experiment</div>
+        <form method="post" action="{% url 'add_experiment' %}" novalidate>
+            {% csrf_token %}
+
+            <div class="form-floating mb-3">
+            {% render_field form.user class="form-control" id=form.user.id_for_label %}
+            <label for="{{ form.user.id_for_label }}">User</label>
+            <div class="text-danger ms-2 small">{% for error in form.user.errors %} {{ error }} {% endfor %}</div>
+            </div>
+
+            <div class="form-floating mb-3">
+            {% render_field form.name class="form-control" id=form.name.id_for_label %}
+            <label for="{{ form.name.id_for_label }}">Name</label>
+            <div class="text-danger ms-2 small">{% for error in form.name.errors %} {{ error }} {% endfor %}</div>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="form-floating mb-3">
+                    {% render_field form.date type="date" class="form-control" id=form.date.id_for_label %}
+                    <label for="{{ form.date.id_for_label }}">Date</label>
+                    <div class="text-danger ms-2 small">{% for error in form.date.errors %} {{ error }} {% endfor %}</div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-floating mb-3">
+                    {% render_field form.time type="time" class="form-control" id=form.time.id_for_label %}
+                    <label for="{{ form.time.id_for_label }}">Time</label>
+                    <div class="text-danger ms-2 small">{% for error in form.time.errors %} {{ error }} {% endfor %}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-floating mb-3">
+            {% render_field form.temperature class="form-control" id=form.temperature.id_for_label %}
+            <label for="{{ form.temperature.id_for_label }}">Temperature (ºC)</label>
+            <div class="text-danger ms-2 small">{% for error in form.temperature.errors %} {{ error }} {% endfor %}</div>
+            </div>
+
+            <div class="form-floating mb-3">
+            {% render_field form.total_volume class="form-control" id=form.total_volume.id_for_label %}
+            <label for="{{ form.total_volume.id_for_label }}">Total volume (ml)</label>
+            <div class="text-danger ms-2 small">{% for error in form.total_volume.errors %} {{ error }} {% endfor %}</div>
+            </div>
+
+            <div class="form-floating mb-3">
+            {% render_field form.reactor class="form-control" id=form.reactor.id_for_label %}
+            <label for="{{ form.reactor.id_for_label }}">Reactor</label>
+            <div class="text-danger ms-2 small">{% for error in form.reactor.errors %} {{ error }} {% endfor %}</div>
+            </div>
+
+            <div class="mb-3 text-center">
+                <button type="submit" name="save_changes" class="btn btn-primary me-3 col-sm-4">Save experiment</button>
+                <button type="reset" class="btn btn-outline-secondary col-sm-4">Cancel</button>
+            </div>
+        </form>
+    </div>
+    <div class="col"></div>
+</div>
+{% endblock content %}

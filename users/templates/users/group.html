@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="row">
+  <div class="col"></div>
+  <div class="col-5">
+  <div class="display-5 mb-4">{{group.name}}</div>
+  
+  {% if users %}
+    {% for user in users%}{{ user.user }}<br />{% endfor %}
+  {% else %}
+    <p>This group has no members.</p>
+  {% endif %}
+  </div>
+  <div class="col"></div>
+</div>
+{% endblock content %}

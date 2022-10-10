@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+<div class="row">
+  <div class="col"></div>
+  <div class="col-5">
+  <div class="display-5 mb-4 text-center">Search database</div>
+        <form method="post" action="{% url 'search_chemicals' %}" id="search_form" novalidate>
+            {% csrf_token %}
+            <div class="input-group">
+                <input type="text" class="form-control" id="search_query" placeholder="Search by name, CAS or InChI(key)"/>
+                <button type="submit" class="btn btn-primary bi-search"> </button>
+            </div>
+        </form>
+        <div id="form_feedback" style="display:none" class="text-danger ms-2 small">Please use a search term of 2 or more characters.</div>
+  </div>
+  <div class="col"></div>
+</div>
+<div class="row">
+  <div class="col"></div>
+  <div class="col-8" id="result"></div>
+  <div class="col"></div>
+</div>
+{% endblock content %}
+
+{% block scripts %}
+
+<script src="{% static 'js/csrf.js' %}"></script>
+
+<script>
+    $('#search_form').on('submit', function(event){
+        event.preventDefault();
+        $("#result").empty();
+        if($('#search_query').val().length > 1 ){
+          $('#form_feedback').hide();
+          search_chemicals();
+        }
+        else {
+          $('#form_feedback').show();
+        }
+    });
+
+    function search_chemicals() {
+        console.log("Searching database for " + $('#search_query').val());
+        $.ajax({
+            url : {% url 'search_chemicals' %},
+            type : "POST",
+            data : { "query" : $('#search_query').val()},
+
+            success : function(json) {
+              $("#result").empty();
+              id = 1;
+              for(i in json.result) {
+                $("#result").append("<div class='card mt-3'><div class='h4 card-title text-center mt-2 mb-2'>" + json.result[i].common_name + " " + json.result[i].abbreviation +
+                    "</div><div class='card-body text-muted border-top'>" +
+                    "CAS: " + json.result[i].cas + 
+                    "<br/>SMILES: " + json.result[i].smiles + 
+                    "<br/>InChIKey=" + json.result[i].inchi_key +
+                    "<br/>InChI=" + json.result[i].inchi +
+                    "</div></div>");
+              }
+              $("#result").append("<div class='text-center mt-2 mb-4'>" +
+                    "<a href={% url 'add_chemical' %} class='link-primary text-decoration-none'>" +
+                    "<strong>Can't find what you're looking for? Add your chemical here!</strong></a></div>");
+            },
+
+            error : function(xhr,errmsg, err) {
+                console.log(xhr.status + ": " + xhr.responseText);
+            }
+
+        });
+    }
+
+</script>
+
+{% endblock scripts %}
+
+<div class="card mb-2">
+        <div class="card-body">
+          <div class="mb-1">
+            {% if group.is_leader %}<a class="text-success text-decoration-none"><strong>Group Leader: </strong></a>{% endif %}
+            <a href={% url 'research_group' group.group.id%} class="text-dark text-decoration-none stretched-link">{{group.group.name}} ({{group.group.short_name}})</a>
+          </div>
+          {% for location in group.group.institution_set.all %}
+            <div class="ms-3 text-secondary">{{location}}</div>
+          {% endfor %}
+        </div>
+      </div>
