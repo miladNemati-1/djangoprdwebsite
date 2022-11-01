@@ -15,6 +15,7 @@
                 </ul>
             </div>
         </li>
+        <li> <a href={% url 'monomer_kinetics' %} class="nav-link px-3 link-dark">Monomer Kinetics</a> </li>
         {% if user.is_staff %}
             <li> <a href={% url 'admin:index' %} class="nav-link px-3 link-dark">Admin</a> </li>
         {% endif %}
@@ -39,6 +40,7 @@
         {% else %}
         <li><a class="btn btn-outline-success me-2" href={% url 'account_signup' %}>Sign Up</a></li>
         <li><a class="btn btn-primary" href={% url 'account_login' %}>Log In</a></li>
+
         {% endif %}
     </ul>
 </header>

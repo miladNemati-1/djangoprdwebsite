@@ -13,6 +13,9 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 import os
 from pathlib import Path
 
+import pymysql
+pymysql.install_as_MySQLdb()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -89,17 +92,27 @@ WSGI_APPLICATION = 'momoda.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'pokedb',
+#         'USER': 'pokedb',
+#         'PASSWORD': 'Po*l6K12e-2208-15',
+#         'HOST': 'mysql.ocio.monash.edu',
+#         'PORT': '3306'
+#     }
+# }
+
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'pokedb',
-        'USER': 'pokedb',
-        'PASSWORD': 'Po*l6K12e-2208-15',
-        'HOST': 'mysql.ocio.monash.edu',
+        'NAME': 'chemistry',
+        'USER': 'root',
+        'PASSWORD': '',
+        'HOST': '127.0.0.1',
         'PORT': '3306'
-    }
-}
-
+    }}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
@@ -166,7 +179,7 @@ ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
-#ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = True
+# ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = True
 # ACCOUNT_SESSION_REMEMBER = True #if false, give a "remember me" option on login
 
 ACCOUNT_FORMS = {

@@ -44,3 +44,16 @@ class Data(models.Model):
     res_time = models.FloatField()
     result = models.FloatField()
     # is_outlier     a function can identify outliers and set this flag so this data can be hidden if needed
+
+
+class Monomer(models.Model):
+    name = models.CharField(verbose_name="Monomer", max_length=511)
+    # if a setup has an experiment the setup can't be deleted
+    Mw = models.CharField(max_length=511)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = 'Monomer'
+        verbose_name_plural = 'Monomers'

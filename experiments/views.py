@@ -1,12 +1,6 @@
-import imp
-from urllib import response
 from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from requests import Response
-from stack_data import Serializer
-from rest_framework import serializers
-from rest_framework.views import APIView
 
 from experiments.forms import AddEquipmentForm, AddChemicalForm, AddExperimentForm, AddIngredientForm
 from measurements.models import Measurement
@@ -14,24 +8,6 @@ from .models import Experiment, Experiment_Chemicals, Reactor, Inventory
 from .tables import EquipmentTable, ExperimentTable, SupplierTable, SuppliesTable
 from measurements.forms import AddFileForm
 from measurements.tables import MeasurementTable
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.decorators import action
-
-
-class ExperimentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Experiment
-        fields = '__all__'
-
-    # @action(detail='False', methods='GET')
-    # @csrf_exempt
-
-
-@csrf_exempt
-@action(methods="GET", detail='true')
-def experiment_info(request):
-    experiment = Experiment.objects.all()
-    return render(experiment)
 
 
 @login_required
@@ -110,13 +86,11 @@ def add_supplier(request):
     return render(request, "experiments/add_chemical.html", context)
 
 
-@csrf_exempt
+@login_required
 def add_experiment(request):
     if request.method == 'POST':
         form = AddExperimentForm(request.POST)
-        print(68)
-        print(request)
-        print(request.POST)
+
         if form.is_valid():
             form.save()
             messages.success(request, 'Your experiment was successfully added')

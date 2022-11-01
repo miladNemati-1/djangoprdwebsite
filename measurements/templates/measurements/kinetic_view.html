@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+
+
+
+{% block content %}
+
+<form id="form" method="post" class="form-inline " action="{% url 'view_3d_monomer_graph' name%}">
+    <div class="row d-flex-justify-centre">
+      <div class="col-md-2">               
+        <label for="floatingInput">Choose CTA</label>
+        <select class="btn btn-secondary dropdown-toggle centre" name="CTA" id="left">
+            {% for option in CTA_list %}<option value={{option}} > {{option}} {% endfor %}</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label >Choose temperature </label>
+        <select class="btn btn-secondary dropdown-toggle justify-right" name="temperature" id="left">
+            {% for option in temperature_list %}<option value={{option}} > {{option}} {% endfor %}</option>
+        </select>
+      </div>
+      <div class="col-md-2 d-flex-justify-centre">
+        <label >Choose cx_ratio order</label>
+        <div class="input-group">
+            <select class="btn btn-secondary dropdown-toggle justify-right" name="cx_ratio" id="left">
+                {% for option in cx_ratio %}<option value={{option}} > {{option}} {% endfor %}</option>
+            </select>
+          <span class="input-group-addon btn"><i class="glyphicon glyphicon-calendar"></i> </span>
+        </div>
+
+      </div>
+      <div class="col-md-2 d-flex-justify-centre">
+        <label >Choose n-th order</label>
+        <div class="input-group">
+            <select class="btn btn-secondary dropdown-toggle justify-right" name="order" id="left">
+                {% for option in reaction_orders %}<option value={{option}} > {{option}} {% endfor %}</option>
+            </select>
+          <span class="input-group-addon btn"><i class="glyphicon glyphicon-calendar"></i> </span>
+        </div>
+
+      </div>
+
+      <div class="col-md-2 row">
+        <button class="btn btn-primary" type="submit">Get rate constant</button>
+      </div>
+    </div>
+  </form>
+<div>
+<p></p>
+
+
+{% autoescape off %}
+    {{ plot_3d_graph }}
+
+{% endautoescape %}
+</div>
+
+
+
+
+{% endblock content %}

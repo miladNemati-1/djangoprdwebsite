@@ -1,0 +1,6 @@
+{% csrf_token %}
+<form method='POST' action="{% url 'view_3d_kinetic_graph' record.name %}"></form>
+<button type='button' 
+     class="btn btn-outline-primary btn-sm" onclick="location.href='{% url 'view_3d_kinetic_graph' record.name %}'" >
+     <i class="bi bi-r-circle"></i>
+</button>

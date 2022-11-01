@@ -1,0 +1,4 @@
+INFO	|	2022-10-18 23:23:57,982		CommunicationMainFolder: /Volumes/shared/Sci-Chem/PRD/NMR 112/Automated Platform/Final_LabView_allVIs/PythonCommunication (Defining Folders)
+WARNING	|	2022-10-18 23:23:57,984		Could not find GPC folder (S:/Sci-Chem/PRD/GPC 112/2018-March/Projects) (Defining Folders)
+INFO	|	2022-10-18 23:23:57,984		Psswin: S:/Sci-Chem/PRD/GPC 112/2018-March/Projects (Defining Folders)
+INFO	|	2022-10-18 23:23:57,984		NMR: /Users/miladnemati/Desktop/NMR/2022 (Defining Folders)

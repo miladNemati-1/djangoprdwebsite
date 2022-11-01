@@ -1,0 +1,9 @@
+{% csrf_token %}
+<form method='POST' action="{% url 'view_3d_monomer_graph' record.name %}"></form>
+<button type='button' 
+    class='btn btn-outline-primary btn-sm' onclick="location.href='{% url 'view_3d_monomer_graph' record.name %}'" >
+    <i class="bi bi-box"></i>
+</button>
+
+
+
