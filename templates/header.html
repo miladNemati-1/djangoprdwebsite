@@ -16,6 +16,7 @@
             </div>
         </li>
         <li> <a href={% url 'monomer_kinetics' %} class="nav-link px-3 link-dark">Monomer Kinetics</a> </li>
+        <li> <a href={% url 'monomer_models' %} class="nav-link px-3 link-dark">Models</a> </li>
         {% if user.is_staff %}
             <li> <a href={% url 'admin:index' %} class="nav-link px-3 link-dark">Admin</a> </li>
         {% endif %}

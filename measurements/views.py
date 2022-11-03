@@ -1,11 +1,13 @@
 from cProfile import label
-from cmath import log, log10
+from cmath import e, log, log10
 from io import BytesIO
+from re import X
 from telnetlib import PRAGMA_HEARTBEAT
 from turtle import color
 from unicodedata import name
 from django.shortcuts import render, redirect
 from numpy import dtype, integer, size
+from regex import E
 import sqlalchemy
 from experiments.models import Experiment
 import plotly.express as px
@@ -31,6 +33,25 @@ import numpy as np
 import mpl_toolkits.mplot3d
 from django.views.decorators.csrf import csrf_exempt
 import math
+from scipy import stats
+from sklearn import tree
+from sklearn.datasets import load_iris
+import graphviz
+from dtreeviz.trees import dtreeviz
+
+
+@login_required
+def monomer_models(request):
+    iris = load_iris()
+    print(type(iris))
+
+    X, y = iris.data, iris.target
+    print(type(iris.data))
+    clf = tree.DecisionTreeClassifier()
+    clf = clf.fit(X, y)
+    text_representation = tree.export_text(clf)
+
+    return render(request, "measurements/models_home.html")
 
 
 def csv_to_db(file, pk):
@@ -195,11 +216,10 @@ def modify_axis(data, axis_label, axis_input):
     except:
         print("not valid")
         pass
+    return data
 
 
-def plot_3d_graph(request, name):
-
-    list_data = get_CTA_reaction_data(request, name)
+def get_axis_data(list_data):
     x, y, z, cx_ratio, CTA = get_axis(list_data)
 
     data = {
@@ -210,7 +230,10 @@ def plot_3d_graph(request, name):
         "cx ratio": cx_ratio,
 
     }
-    df = pandas.DataFrame(data)
+    return data
+
+
+def plot_3d_graph(request, name, df):
 
     fig = px.scatter_3d(df, x='temperature(C)',
                         y='residence_time(s)', z='conversion%', color="Chain Transfer Agent", symbol="cx ratio")
@@ -222,6 +245,9 @@ def plot_3d_graph(request, name):
 @csrf_exempt
 @login_required
 def view_3d_graph(request, name):
+    list_data = get_CTA_reaction_data(request, name)
+    data = get_axis_data(list_data)
+    df = pandas.DataFrame(data)
 
     axis = [
         "temperature(C)",
@@ -231,6 +257,8 @@ def view_3d_graph(request, name):
     ]
 
     if request.method == 'POST':
+        list_data = get_CTA_reaction_data(request, name)
+        data = get_axis_data(list_data)
         left_axis = request.POST.get("axis_left")
         left_input = request.POST.get("left-input")
         middle_axis = request.POST.get("axis_middle")
@@ -240,12 +268,14 @@ def view_3d_graph(request, name):
         data = modify_axis(data, left_axis, left_input)
         data = modify_axis(data, middle_axis, middle_input)
         data = modify_axis(data, right_axis, right_input)
+        df = pandas.DataFrame(data)
 
-    plot_3d = plot_3d_graph(request, name)
+    plot_3d = plot_3d_graph(request, name, df)
     context = {
         'plot_3d_graph': plot_3d,
         'axis': axis,
         'name': name
+
     }
 
     return render(request, 'measurements/3D_graph.html', context)
@@ -255,9 +285,11 @@ def view_3d_graph(request, name):
 @login_required
 def view_3d_kinetic_graph(request, name):
 
-    three_d_graph = plot_3d_graph(request, name)
     list_data = get_CTA_reaction_data(request, name)
     temperature, y, z, cx_ratio, CTA = get_axis(list_data)
+    data = get_axis_data(list_data)
+    df = pandas.DataFrame(data)
+    k = "rate constant"
 
     CTA_list = set(CTA)
     temperature_list = set(temperature)
@@ -268,12 +300,46 @@ def view_3d_kinetic_graph(request, name):
         "3rd Order"
     ]
     cx_ratio = set(cx_ratio)
+
+    if request.method == 'POST':
+        CTA_chosen = request.POST.get("CTA")
+        Temperature_chosen = request.POST.get("temperature")
+        cx_ratio_chosen = request.POST.get("cx_ratio")
+        order_chosen = request.POST.get("order")
+
+        df = df.loc[(df['temperature(C)'] == float(Temperature_chosen)) & (
+            df['Chain Transfer Agent'] == CTA_chosen) & (
+            df['cx ratio'] == float(cx_ratio_chosen))]
+        try:
+            k = determine_1st_order_rate_constant(df)
+        except:
+            pass
+
+    three_d_graph = plot_3d_graph(request, name, df)
     context = {
         'temperature_list': temperature_list,
         'CTA_list': CTA_list,
         'name': name,
         'reaction_orders': reaction_orders,
         'plot_3d_graph': three_d_graph,
-        'cx_ratio': cx_ratio}
+        'cx_ratio': cx_ratio,
+        'k': k
+    }
 
     return render(request, 'measurements/kinetic_view.html', context)
+
+
+def determine_1st_order_rate_constant(df):
+    t = df['residence_time(s)']
+    conc_M_M0_conversion = df['conversion%']
+    monomer_remaining = []
+
+    # get from db
+    initial_monomer_concentration = 1
+    print(conc_M_M0_conversion)
+    for conversion_percent in conc_M_M0_conversion:
+        monomer_remaining.append(log(
+            ((1-(conversion_percent * initial_monomer_concentration)) / initial_monomer_concentration), e).real)
+
+    k = stats.linregress(monomer_remaining, t)[0]
+    return k
