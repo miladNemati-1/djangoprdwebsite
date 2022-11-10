@@ -15,24 +15,24 @@
 
 {% endautoescape %}
 <div class="d-flex justify-content-center"><form class="form-inline" method="post" action="{% url 'view_3d_monomer_graph' name%}">
-    <select name="axis_left" id="left">
+    <select class='btn btn-primary' name="axis_left" id="left">
         {% for option in axis %}<option value={{option}} > {{option}} {% endfor %}</option>
       </select>
 
     <input type="text" id="formula-left-input" placeholder="use x" name="left-input">
-    <select name="axis_middle" id="middle">
+    <select class='btn btn-primary' name="axis_middle" id="middle">
         {% for option in axis %}<option value={{option}}> {{ option }} {% endfor %}</option>
       </select>
 
     <input type="text" id="formula-middle-input" placeholder="use x" name="middle-input">
-    <select name="axis_right" id="right">
+    <select class='btn btn-primary' name="axis_right" id="right">
         {% for option in axis %}<option value={{ option }}> {{ option }} {% endfor %}</option>
       </select>
 
     <input type="text" id="formula-right-input" placeholder="use x" name="right-input">
 
     <label>
-    <button type="submit">Change Graph</button>
+    <button class='btn btn-secondary'  type="submit">Change Graph</button>
   </form>
 </div>
 

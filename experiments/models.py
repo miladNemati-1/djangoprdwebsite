@@ -43,13 +43,16 @@ class Experiment(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     date = models.DateField(default=date.today)
     time = models.TimeField()
-    monomer = models.CharField(max_length=127)
+    monomer_id = models.IntegerField()
+    cta_id = models.IntegerField()
+    initiator_id = models.IntegerField()
+    monomer_concentration = models.CharField(max_length=127)
+    cta_concentration = models.CharField(max_length=127)
+    initiator_concentration = models.CharField(max_length=127)
     # your internal identifier for your experiment
     name = models.CharField(max_length=127)
     temperature = models.FloatField(verbose_name="Temperature (ºC)")
     total_volume = models.FloatField(verbose_name="Volume (ml)")
-    CTA = models.CharField(max_length=127)
-    cx_ratio = models.FloatField(verbose_name="cx_ratio")
     # if a setup has an experiment the setup can't be deleted
     reactor = models.ForeignKey(Reactor, on_delete=models.PROTECT, null=True)
 

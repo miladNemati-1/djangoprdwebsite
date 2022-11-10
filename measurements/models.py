@@ -50,6 +50,11 @@ class Monomer(models.Model):
     name = models.CharField(verbose_name="Monomer", max_length=511)
     # if a setup has an experiment the setup can't be deleted
     Mw = models.CharField(max_length=511)
+    density_g_per_ml = models.CharField(max_length=511)
+    boiling_point_celsius = models.CharField(max_length=511)
+    vapour_pressure_kPa = models.CharField(max_length=511)
+    viscosity_cP = models.CharField(max_length=511)
+    c_number = models.CharField(max_length=511)
 
     def __str__(self):
         return self.name
@@ -57,3 +62,20 @@ class Monomer(models.Model):
     class Meta:
         verbose_name = 'Monomer'
         verbose_name_plural = 'Monomers'
+
+
+class cta(models.Model):
+    name = models.CharField(verbose_name="Monomer", max_length=511)
+    # if a setup has an experiment the setup can't be deleted
+    Mw_cta = models.CharField(max_length=511)
+    density_g_per_ml_cta = models.CharField(max_length=511)
+    reflective_index_cta = models.CharField(max_length=511)
+    boiling_point_c_cta = models.CharField(max_length=511)
+    c_number_cta = models.CharField(max_length=511)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = 'cta'
+        verbose_name_plural = 'cta'

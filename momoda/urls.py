@@ -5,7 +5,7 @@ from django.urls import path, include
 from users.views import home_page, my_account, research_group, create_group, get_institution_ajax
 from chemicals.views import search_chemicals, add_chemical, chemical_details
 from experiments.views import add_experiment, my_experiments, my_chemicals, my_equipment, add_equipment, add_supplier, experiment_detail
-from measurements.views import monomer_kinetics, upload_file, delete_file, view_3d_graph, view_graph, view_3d_kinetic_graph, monomer_models
+from measurements.views import monomer_kinetics, upload_file, delete_file, view_3d_graph, view_graph, view_3d_kinetic_graph, monomer_models, all_visualisations
 
 urlpatterns = [
     path('', home_page, name='home'),
@@ -38,7 +38,9 @@ urlpatterns = [
     path('measurements/view_3d_kinetics_graph/<str:name>',
          view_3d_kinetic_graph, name='view_3d_kinetic_graph'),
     path('measurements/monomer_models/',
-         monomer_models, name='monomer_models')
+         monomer_models, name='monomer_models'),
+    path('measurements/all_visualisations/',
+         all_visualisations, name='all_visualisations')
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL,
