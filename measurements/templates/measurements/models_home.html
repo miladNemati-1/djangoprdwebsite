@@ -11,68 +11,68 @@
         <div class="row">
           <div class="col">
             <label for="temperature_label"></label>
-            <input type="number" step="0.001" name = "r_temp" placeholder="Enter Temperature (Degrees Celsius)" class="form-control" id="temperature_input_id">
+            <input type="number" step="0.001" name = "r_temp" placeholder="Enter Temperature (Degrees Celsius)" class="form-control" id="temperature_input_id" required>
         </div>
           <div class="col">
             <label for="cxratio_label"></label>
-            <input type="number" step="0.001" name = "r_cx_cm" placeholder="Enter cx/cm ratio" class="form-control" id="cx_ratio_id">
+            <input type="number" step="0.001" name = "r_cx_cm" placeholder="Enter cx/cm ratio" class="form-control" id="cx_ratio_id" required>
           </div>
           <div class="w-100" > 
             <div><p></p></div><h3 class="text-center">Your Monomer's Details</h3>
           </div>
           <div class="col">
-            <input type="number" step="0.001"  name = "monomer_mw" class="form-control" id="monomer_mw_id"  placeholder="Enter Monomer's Molecular weight (g/mol)">
+            <input type="number" step="0.001"  name = "monomer_mw" class="form-control" id="monomer_mw_id"  placeholder="Enter Monomer's Molecular weight (g/mol)" required>
           </div>
           <div class="col">
-            <input type="number" step="0.001" name="monomer_d" class="form-control" id="monomer_d_id" placeholder="Enter Monomer's Density (g/ml)">
+            <input type="number" step="0.001" name="monomer_d" class="form-control" id="monomer_d_id" placeholder="Enter Monomer's Density (g/ml)" required>
           </div>
           <div class="w-100" > 
             <div><p></p></div>
           </div>
           <div class="col">
-            <input type="number" step="0.001" name="monomer_vp" class="form-control" id="monomer_vp_id" placeholder="Enter Monomer's Vapour Pressure (kPa)">
+            <input type="number" step="0.001" name="monomer_vp" class="form-control" id="monomer_vp_id" placeholder="Enter Monomer's Vapour Pressure (kPa)" required>
           </div>
           <div class="col">
-            <input type="number" step="0.001" name="monomer_bp" class="form-control" id="monomer_bp_id"  placeholder="Enter Monomer's Boiling Point (Degrees Celsius)">
+            <input type="number" step="0.001" name="monomer_bp" class="form-control" id="monomer_bp_id"  placeholder="Enter Monomer's Boiling Point (Degrees Celsius)" required>
           </div>
           <div class="w-100" > </div>
             <div><p></p></div>
               <div class="col">
-                <input type="number" step="0.001" name="monomer_v" class="form-control" id="monomer_v_id"  placeholder="Enter Monomer's Viscosity (cP)">
+                <input type="number" step="0.001" name="monomer_v" class="form-control" id="monomer_v_id"  placeholder="Enter Monomer's Viscosity (cP)" required>
               </div>
               <div class="col">
-                <input type="number" step="0.001" name="monomer_nc" class="form-control" id="monomer_nc_id"  placeholder="Enter Monomer's Number of Carbons">
+                <input type="number" step="0.001" name="monomer_nc" class="form-control" id="monomer_nc_id"  placeholder="Enter Monomer's Number of Carbons" required>
             </div>
             <div class="w-100" > 
                 <div><p></p></div><h3 step="0.001" class="text-center">Your Chain Transfer Agent's Details</h3>
               </div>
               <div class="col">
-                <input type="number" step="0.001" name="cta_mw" class="form-control" id="cta_mw_id"  placeholder="Enter CTA's Molecular weight (g/mol)">
+                <input type="number" step="0.001" name="cta_mw" class="form-control" id="cta_mw_id"  placeholder="Enter CTA's Molecular weight (g/mol)" required>
               </div>
               <div class="col">
-                <input type="number" step="0.001" name="cta_d"  class="form-control" id="cta_d_id" placeholder="Enter CTA's Density (g/ml)">
+                <input type="number" step="0.001" name="cta_d"  class="form-control" id="cta_d_id" placeholder="Enter CTA's Density (g/ml)" required>
               </div>
               <div class="w-100" > 
                 <div><p></p></div>
               </div>
               <div class="col">
-                <input type="number" step="0.001" name="cta_ri" class="form-control" id="cta_ri_id" placeholder="Enter CTA's Reflective Index">
+                <input type="number" step="0.001" name="cta_ri" class="form-control" id="cta_ri_id" placeholder="Enter CTA's Reflective Index" required>
               </div>
               <div class="col">
-                <input type="number" step="0.001" name="cta_bp" class="form-control" id="cta_bp_id"  placeholder="Enter CTA's Boiling Point (Degrees Celsius)">
+                <input type="number" step="0.001" name="cta_bp" class="form-control" id="cta_bp_id"  placeholder="Enter CTA's Boiling Point (Degrees Celsius)" required>
               </div>
               <div class="w-100" > </div>
                 <div><p></p></div>
                 
                   <div class="col">
-                    <input type="number" step="0.001" name="cta_v" class="form-control" id="cta_v_id"  placeholder="Enter CTA's Viscosity (cP)">
+                    <input type="number" step="0.001" name="cta_v" class="form-control" id="cta_v_id"  placeholder="Enter CTA's Viscosity (cP)" required>
                   </div>
                   <!-- <div class="col">
                         <button class="btn btn-primary" type="submit">Get rate constant</button>
 
                 </div> -->
                   <div class="col">
-                    <input type="number" step="0.001" name="cta_nc" class="form-control" id="cta_nc_id"  placeholder="Enter CTA's Number of Carbons">
+                    <input type="number" step="0.001" name="cta_nc" class="form-control" id="cta_nc_id"  placeholder="Enter CTA's Number of Carbons " required>
                 </div>
                 <div class="w-100" > </div>
                 <div><p></p></div>
@@ -112,5 +112,6 @@
     </div>
 </div>
 </form>
+
     {% endblock content %}
 

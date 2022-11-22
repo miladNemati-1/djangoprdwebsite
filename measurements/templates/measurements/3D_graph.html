@@ -8,35 +8,54 @@
 {% block content %}
 
 
-
-<div class="d-flex justify-content-center"></div>
 {% autoescape off %}
     {{ plot_3d_graph }}
 
 {% endautoescape %}
-<div class="d-flex justify-content-center"><form class="form-inline" method="post" action="{% url 'view_3d_monomer_graph' name%}">
-    <select class='btn btn-primary' name="axis_left" id="left">
-        {% for option in axis %}<option value={{option}} > {{option}} {% endfor %}</option>
+
+
+
+<form id="form" method="post" class="form-inline " action="{% url 'view_3d_monomer_graph' name%}">
+  <div class="row d-flex-justify-centre">
+    <div class="col-md-2">               
+      <label for="floatingInput">Choose X axis</label>
+      <select class="btn btn-secondary dropdown-toggle centre" name="choose_x" id="choose_x_id">
+          {% for option in axis %}<option value='{{option}}' > {{option}} {% endfor %}</option>
       </select>
-
-    <input type="text" id="formula-left-input" placeholder="use x" name="left-input">
-    <select class='btn btn-primary' name="axis_middle" id="middle">
-        {% for option in axis %}<option value={{option}}> {{ option }} {% endfor %}</option>
+      {% include "xinput_accordion.html" %}
+      <!-- <input class = 'form-control' type="text" id="formula-left-input" placeholder="Modify axis using x" name="x-input"> -->
+    </div>
+    <div class="col-md-2">
+      <label >Choose Y axis</label>
+      <select class="btn btn-secondary dropdown-toggle justify-right" name="choose_y" id="choose_y_id">
+          {% for option in axis %}<option value='{{option}}' > {{option}} {% endfor %}</option>
+          
       </select>
+      {% include "yinput_accordion.html" %}
+      <!-- <input class = 'form-control'type="text" id="formula-left-input" placeholder="Modify axis using x" name="y-input"> -->
+    </div>
+    <div class="col-md-2 d-flex-justify-centre">
+      <label >Choose Z axis</label>
+      <div class="input-group">
+          <select class="btn btn-secondary dropdown-toggle justify-right" name="choose_z" id="choose_z_id">
+              {% for option in axis %}<option value='{{option}}' > {{option}} {% endfor %}</option>
+          </select>
+          {% include "zinput_accordion.html" %}
+          <!-- <input class = 'form-control' type="text" id="formula-left-input" placeholder="Modify axis using x" name="z-input"> -->
+        <span class="input-group-addon btn"><i class="glyphicon glyphicon-calendar"></i> </span>
 
-    <input type="text" id="formula-middle-input" placeholder="use x" name="middle-input">
-    <select class='btn btn-primary' name="axis_right" id="right">
-        {% for option in axis %}<option value={{ option }}> {{ option }} {% endfor %}</option>
-      </select>
+      </div>
+      
 
-    <input type="text" id="formula-right-input" placeholder="use x" name="right-input">
-
-    <label>
-    <button class='btn btn-secondary'  type="submit">Change Graph</button>
-  </form>
-</div>
-
-
+    </div>
+    <div class="col-md-2 row">
+      <button class="btn btn-primary" type="submit">Change Axis</button>
+    </div>
+   
+  </div>
+</form>
+<div>
+<p></p>
 
 
 

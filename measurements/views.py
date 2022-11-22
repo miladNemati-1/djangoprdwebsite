@@ -69,7 +69,45 @@ def get_experiment_rate_values(df_measurements):
     return rate_measurement_id_df
 
 
-def create_descision_tree_model():
+def cross_validate():
+    return
+
+
+def remove_data_jumps(df_time_result):
+    pointer = 0
+    print(df_time_result)
+    column = df_time_result['result']
+    for i in range(len(df_time_result['result'])-1):
+        next_value = float(column.iloc[i+1])
+        print(column.iloc[pointer])
+        print(next_value)
+        if float(column.iloc[pointer]) + (0.05*(float(column.iloc[pointer]))) < next_value:
+            column.iloc[i+1] = ''
+        elif (float(column.iloc[pointer])) > next_value + (0.05*(next_value)):
+            column.iloc[i+1] = ''
+        elif next_value < 0:
+            column.iloc[i+1] = ''
+        else:
+            pointer = i+1
+    return df_time_result
+
+
+def clean_timesweep_data(monomer_conversion: pandas.DataFrame):
+    df = monomer_conversion[['monomer_name',
+                             'cta_name', 'cx_ratio', 'temperature']]
+    list_df = df.values.tolist()
+    unique_rows = np.unique(list_df, axis=0)
+
+    for row in unique_rows:
+        data_slice = monomer_conversion.loc[(
+            monomer_conversion['monomer_name'] == row[0]) & (monomer_conversion['cta_name']
+                                                             == row[1]) & (monomer_conversion['cx_ratio'] == row[2]) & (monomer_conversion['temperature'] == row[3])]
+
+        monomer_conversion.loc[(
+            monomer_conversion['monomer_name'] == row[0]) & (monomer_conversion['cta_name']
+                                                             == row[1]) & (monomer_conversion['cx_ratio'] == row[2]) & (monomer_conversion['temperature'] == row[3])] = remove_data_jumps(
+            data_slice)
+
     return
 
 
@@ -99,7 +137,9 @@ def clean_data_frame(df):
 @ login_required
 def all_visualisations(request):
     df = get_all_res_time_conversion_data()
+    clean_timesweep_data(df)
     df = clean_data_frame(df)
+
     x = 'Monomer'
     y = 'Residence Time (min)'
     z = 'Conversion'
@@ -114,10 +154,9 @@ def all_visualisations(request):
         symbol = request.POST.get("choose_marker")
         x_input = request.POST.get("x-input")
         y_input = request.POST.get("y-input")
-        z_input = request.POST.get("z-choose")
+        z_input = request.POST.get("z-input")
 
         df = df.dropna()
-        df.to_csv("/Users/miladnemati/Desktop/file.csv")
         df = modify_axis_all_visualisations(df, x, x_input)
         df = modify_axis_all_visualisations(df, y, y_input)
         df = modify_axis_all_visualisations(df, z, z_input)
@@ -165,10 +204,25 @@ def get_all_data():
     df_experiments_cta_join = df_experiments_monomer_join.set_index('cta_id').join(
         cta_info_df.set_index('id').add_prefix('cta_'))
 
-    df_experiments_monomer_join.to_csv(
-        "/Users/miladnemati/Desktop/df_experiments_monomer_join.csv")
-
     return df_experiments_cta_join
+
+
+def create_descision_tree_from_df(df):
+    X = df.iloc[:, :-1].values
+    Y = df.iloc[:, -1].values.reshape(-1, 1)
+    X_train, X_test, Y_train, Y_test = train_test_split(
+        X, Y, test_size=.2, random_state=41)
+    regressor = DecisionTreeRegressor(min_samples_split=3)
+
+    kinetics_model = regressor.fit(X_train, Y_train)
+    Y_pred = regressor.predict(X_test)
+
+    error_tree_meansquared = np.sqrt(mean_squared_error(Y_test, Y_pred))
+    return [kinetics_model, error_tree_meansquared]
+
+
+def predict_from_model(fit, input):
+    return fit.predict(input)
 
 
 @ csrf_exempt
@@ -176,26 +230,16 @@ def get_all_data():
 def monomer_models(request):
 
     df_experiments_cta_join = get_all_data()
+    predicted_k = "Predicted Rate"
+    squared_error = "Mean Square Error"
 
     df_experiments_cta_join.dropna(subset=['rate'], inplace=True)
 
     data_target = df_experiments_cta_join[['temperature',	'cta_concentration', 'monomer_Mw', 'monomer_density_g_per_ml', 'monomer_boiling_point_celsius', 'monomer_vapour_pressure_kPa',
                                            'monomer_viscosity_cP', 'monomer_c_number', 'cta_Mw_cta', 'cta_density_g_per_ml_cta', 'cta_reflective_index_cta', 'cta_boiling_point_c_cta', 'cta_c_number_cta', 'rate']]
+    model = create_descision_tree_from_df(data_target)[0]
+    squared_error = create_descision_tree_from_df(data_target)[1]
     data_target.to_csv("/Users/miladnemati/Desktop/model_features.csv")
-
-    X = data_target.iloc[:, :-1].values
-    Y = data_target.iloc[:, -1].values.reshape(-1, 1)
-    X_train, X_test, Y_train, Y_test = train_test_split(
-        X, Y, test_size=.2, random_state=41)
-    regressor = DecisionTreeRegressor(min_samples_split=3)
-
-    kinetics_model = regressor.fit(X_train, Y_train)
-    Y_pred = regressor.predict(X_test)
-    tree_text_represenation = tree.export_text(kinetics_model)
-    predicted_k = "Predicted Rate"
-    squared_error = "Mean Square Error"
-
-    error_tree_meansquared = np.sqrt(mean_squared_error(Y_test, Y_pred))
 
     if request.method == 'POST':
         temp = request.POST.get("r_temp")
@@ -211,14 +255,9 @@ def monomer_models(request):
         cta_ri = request.POST.get("cta_ri")
         cta_bp = request.POST.get("cta_bp")
         cta_nc = request.POST.get("cta_bp")
-        try:
-            prediction_input = [[temp, cx_cm, monomer_mw, monomer_d, monomer_bp, monomer_vp, monomer_v, monomer_nc, cta_mw, cta_d,
-                                 cta_ri, cta_bp, cta_nc]]
-            prediction = regressor.predict(prediction_input)
-            predicted_k = prediction[0]
-            squared_error = error_tree_meansquared
-        except:
-            pass
+        prediction_input = [[temp, cx_cm, monomer_mw, monomer_d, monomer_bp, monomer_vp, monomer_v, monomer_nc, cta_mw, cta_d,
+                             cta_ri, cta_bp, cta_nc]]
+        predicted_k = predict_from_model(model, prediction_input)[0]
 
     context = {
         "predicted_k": predicted_k,
@@ -226,7 +265,6 @@ def monomer_models(request):
 
     }
 
-    # print(error_tree_meansquared)
     return render(request, "measurements/models_home.html", context)
 
 
@@ -347,12 +385,14 @@ def get_all_res_time_conversion_data():
 
     finale_merged_data = finale_merged_data[[
         "monomer_name", 'cta_name', 'cx_ratio', 'res_time', 'result', 'temperature']]
-    finale_merged_data.to_csv("/Users/miladnemati/Desktop/finale.csv")
     return finale_merged_data
 
 
 def get_CTA_reaction_data(request, name):
     finale_merged_data = get_all_res_time_conversion_data()
+    clean_timesweep_data(finale_merged_data)
+    finale_merged_data.replace('', np.nan, inplace=True)
+    finale_merged_data.dropna()
 
     filtered_data_experiments = finale_merged_data.loc[finale_merged_data['monomer_name'] == name]
 
@@ -378,6 +418,7 @@ def get_axis(list_data):
 
 def modify_axis_all_visualisations(data, axis_label, axis_input):
     new_data = list(data[axis_label])
+
     try:
 
         for i in range(len(new_data)):
@@ -385,7 +426,6 @@ def modify_axis_all_visualisations(data, axis_label, axis_input):
             new_formula = str(axis_input).replace(
                 "x", str(new_data[i]))
             new_data[i] = eval(new_formula).real
-            print(i)
 
         data[axis_label] = new_data
     except:
@@ -395,28 +435,14 @@ def modify_axis_all_visualisations(data, axis_label, axis_input):
     return data
 
 
-def modify_axis(data, axis_label, axis_input):
-    try:
-        for i in range(len(data[axis_label])):
-
-            new_formula = str(axis_input).replace(
-                "x", str(data[axis_label][i]))
-            new_value = eval(new_formula)
-            data[axis_label][i] = new_value.real
-
-    except:
-        print("not valid")
-        pass
-    return data
-
-
 def get_axis_data(list_data):
+    list_data.dropna(inplace=True)
     x, y, z, cx_ratio, CTA = get_axis(list_data)
 
     data = {
         "temperature(C)": x,
         "residence_time(s)": y,
-        "conversion%": z,
+        "conversion": z,
         "Chain Transfer Agent": CTA,
         "cx ratio": cx_ratio,
 
@@ -427,7 +453,7 @@ def get_axis_data(list_data):
 def plot_3d_graph(request, name, df):
 
     fig = px.scatter_3d(df, x='temperature(C)',
-                        y='residence_time(s)', z='conversion%', color="Chain Transfer Agent", symbol="cx ratio")
+                        y='residence_time(s)', z='conversion', color="Chain Transfer Agent", symbol="cx ratio")
     fig.update_traces(marker=dict(size=5),
                       selector=dict(mode='markers'))
     return fig.to_html()
@@ -449,16 +475,16 @@ def view_3d_graph(request, name):
     ]
 
     if request.method == 'POST':
-        left_axis = request.POST.get("axis_left")
-        left_input = request.POST.get("left-input")
-        middle_axis = request.POST.get("axis_middle")
-        middle_input = request.POST.get("middle-input")
-        right_axis = request.POST.get("axis_right")
-        right_input = request.POST.get("right-input")
+        left_axis = request.POST.get("choose_x")
+        left_input = request.POST.get("x-input")
+        middle_axis = request.POST.get("choose_y")
+        middle_input = request.POST.get("y-input")
+        right_axis = request.POST.get("choose_z")
+        right_input = request.POST.get("z-input")
+
         df = modify_axis_all_visualisations(df, left_axis, left_input)
         df = modify_axis_all_visualisations(df, middle_axis, middle_input)
         df = modify_axis_all_visualisations(df, right_axis, right_input)
-    print(df)
     plot_3d = plot_3d_graph(request, name, df)
     context = {
         'plot_3d_graph': plot_3d,
@@ -475,6 +501,8 @@ def view_3d_graph(request, name):
 def view_3d_kinetic_graph(request, name):
 
     list_data = get_CTA_reaction_data(request, name)
+    list_data.dropna(inplace=True)
+    list_data.to_csv("/Users/miladnemati/Desktop/result/list_data.csv")
     temperature, y, z, cx_ratio, CTA = get_axis(list_data)
     data = get_axis_data(list_data)
     df = pandas.DataFrame(data)
@@ -499,7 +527,6 @@ def view_3d_kinetic_graph(request, name):
         df = df.loc[(df['temperature(C)'] == float(Temperature_chosen)) & (
             df['Chain Transfer Agent'] == CTA_chosen) & (
             df['cx ratio'] == float(cx_ratio_chosen))]
-        df.to_csv("/Users/miladnemati/Desktop/modification_view.csv")
         try:
             k = determine_1st_order_rate_constant(df)
         except:
@@ -523,7 +550,6 @@ def determine_1st_order_rate_constant(df):
     t = df['residence_time(s)']
     conc_M_M0_conversion = df['conversion%']
     monomer_remaining = []
-    # get from db
     initial_monomer_concentration = 1
     for conversion_percent in conc_M_M0_conversion:
         monomer_remaining.append(log(
