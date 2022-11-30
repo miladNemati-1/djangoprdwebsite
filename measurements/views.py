@@ -97,7 +97,7 @@ def get_all_cleaned_res_time_conversion_data():
     return df_experiments_cta_join
 
 
-def determine_rate_of_data_subset(data_subset, unique_measurement_id):
+def determine_rate_of_data_subset(data_subset):
 
     results_floats = [(1-(log(float(1*x), e))).real
                       for x in data_subset['result']]
@@ -107,7 +107,7 @@ def determine_rate_of_data_subset(data_subset, unique_measurement_id):
 
     k = stats.linregress(
         results_floats, res_time_floats)[0]
-    return [unique_measurement_id, k]
+    return k
 
 
 @csrf_exempt
@@ -118,8 +118,8 @@ def add_experiment_rate_values_column(df_measurements: pandas.DataFrame):
     for unique_measurement_id in unique_data_set:
         data_subset = pandas.DataFrame(
             df_measurements[df_measurements["rate_measurement_join_column"] == unique_measurement_id])
-        measurement_id_rate_arr.append(
-            determine_rate_of_data_subset(data_subset, unique_measurement_id))
+        measurement_id_rate_arr.append([unique_measurement_id,
+                                        determine_rate_of_data_subset(data_subset)])
 
     rate_measurement_id_df = pandas.DataFrame(
         measurement_id_rate_arr, columns=("rate_measurement_join_column", "rate"))
@@ -164,8 +164,6 @@ def clean_timesweep_data(monomer_conversion: pandas.DataFrame):
 def clean_data_frame(df):
     df.rename(columns={
         "monomer_name": "Monomer", 'cta_name': 'Chain Transfer Agent', 'res_time': 'Residence Time (min)', 'temperature': 'Temperature (C)', "result": "Conversion"}, inplace=True)
-    df.replace('', np.nan, inplace=True)
-    df.dropna(inplace=True)
     df = modify_axis_all_visualisations(
         df, 'Residence Time (min)', "round((float(x)/60),3)")
     df = modify_axis_all_visualisations(
@@ -226,11 +224,6 @@ def create_descision_tree_from_df(df):
     print(X_train[0])
     print(Y_train[0])
 
-    X_train = np.round(X_train[0].astype(np.float64), 3)
-    Y_train = np.round(Y_train[0].astype(np.float64), 3)
-    R_square = r2_score(X_train, Y_train)
-    print('Coefficient of Determination', R_square)
-
     error_tree_meansquared = np.sqrt(mean_squared_error(Y_test, Y_pred))
     return [kinetics_model, error_tree_meansquared]
 
@@ -247,13 +240,12 @@ def monomer_models(request):
     predicted_k = "Predicted Rate"
     squared_error = "Mean Square Error"
 
-    df_experiments_cta_join.dropna(subset=['rate'], inplace=True)
+    # df_experiments_cta_join.dropna(subset=['rate'], inplace=True)
 
     data_target = df_experiments_cta_join[['temperature',	'cta_concentration', 'monomer_Mw', 'monomer_density_g_per_ml', 'monomer_boiling_point_celsius', 'monomer_vapour_pressure_kPa',
                                            'monomer_viscosity_cP', 'monomer_c_number', 'cta_Mw_cta', 'cta_density_g_per_ml_cta', 'cta_reflective_index_cta', 'cta_boiling_point_c_cta', 'cta_c_number_cta', 'rate']]
     model = create_descision_tree_from_df(data_target)[0]
     squared_error = create_descision_tree_from_df(data_target)[1]
-    data_target.to_csv("/Users/miladnemati/Desktop/model_features.csv")
 
     if request.method == 'POST':
         temp = request.POST.get("r_temp")
@@ -370,8 +362,6 @@ def view_graph(request, pk):
 
 def get_CTA_reaction_data(request, name):
     finale_merged_data = get_all_cleaned_res_time_conversion_data()
-    finale_merged_data.replace('', np.nan, inplace=True)
-    finale_merged_data.dropna()
     filtered_data_experiments = finale_merged_data.loc[finale_merged_data['monomer_name'] == name]
 
     return filtered_data_experiments
@@ -413,14 +403,12 @@ def modify_axis_all_visualisations(data, axis_label, axis_input):
 
 
 def get_axis_data(list_data):
-    list_data.replace('', np.nan, inplace=True)
-    list_data.dropna(inplace=True)
     x, y, z, cx_ratio, CTA = get_axis(list_data)
 
     data = {
         "temperature(C)": x,
-        "residence_time(s)": y,
-        "conversion": z,
+        "res_time": y,
+        "result": z,
         "Chain Transfer Agent": CTA,
         "cta_concentration": cx_ratio,
 
@@ -446,7 +434,7 @@ def plot_2d_kinetic_graph(name):
 def plot_3d_graph(df):
 
     fig = px.scatter_3d(df, x='temperature(C)',
-                        y='residence_time(s)', z='conversion', color="Chain Transfer Agent", symbol="cta_concentration")
+                        y='res_time', z='result', color="Chain Transfer Agent", symbol="cta_concentration")
     fig.update_traces(marker=dict(size=5),
                       selector=dict(mode='markers'))
     return fig.to_html()
@@ -458,7 +446,6 @@ def view_3d_graph(request, name):
     list_data = get_CTA_reaction_data(request, name)
     data = get_axis_data(list_data)
     df = pandas.DataFrame(data)
-    df = df.dropna()
 
     axis = [
         "temperature(C)",
@@ -494,15 +481,13 @@ def view_3d_graph(request, name):
 def view_3d_kinetic_graph(request, name):
 
     list_data = get_CTA_reaction_data(request, name)
-    list_data.dropna(inplace=True)
 
     temperature, y, z, cx_ratio, CTA = get_axis(list_data)
     data = get_axis_data(list_data)
+    print(cx_ratio)
 
     df = pandas.DataFrame(data)
-    df.to_csv("/Users/miladnemati/Desktop/result/list_data.csv")
     k = "rate constant"
-
     CTA_list = set(CTA)
     temperature_list = set(temperature)
 
@@ -518,11 +503,15 @@ def view_3d_kinetic_graph(request, name):
         Temperature_chosen = request.POST.get("temperature")
         cx_ratio_chosen = request.POST.get("cta_concentration")
         order_chosen = request.POST.get("order")
+        print(cx_ratio_chosen)
+        df.to_csv("/Users/miladnemati/Desktop/to_chose_from.csv")
 
         df = df.loc[(df['temperature(C)'] == float(Temperature_chosen)) & (
             df['Chain Transfer Agent'] == CTA_chosen) & (
             df['cta_concentration'] == float(cx_ratio_chosen))]
+        df.to_csv("/Users/miladnemati/Desktop/data subset for rate.csv")
         try:
+
             k = determine_rate_of_data_subset(df)
         except:
             print("not valid")

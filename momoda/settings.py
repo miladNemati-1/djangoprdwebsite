@@ -92,28 +92,28 @@ WSGI_APPLICATION = 'momoda.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'mysql.connector.django',
-        'NAME': 'pokedb',
-        'USER': 'pokedb',
-        'PASSWORD': 'Po*l6K12e-220815',
-        'HOST': 'mysql.ocio.monash.edu',
-        'PORT': 3306,
-    }
-}
-
-
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'chemistry',
-#         'USER': 'root',
-#         'PASSWORD': '',
-#         'HOST': 'localhost',
+#         'NAME': 'pokedb',
+#         'USER': 'pokedb',
+#         'PASSWORD': 'Po*l6K12e-2208-15',
+#         'HOST': 'mysql.ocio.monash.edu',
 #         'PORT': '3306'
+#     }
+# }
 
-#     }}
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'chemistry',
+        'USER': 'root',
+        'PASSWORD': '',
+        'HOST': 'localhost',
+        'PORT': '3306'
+
+    }}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
