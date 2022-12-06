@@ -9,11 +9,15 @@ https://docs.djangoproject.com/en/4.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
-
-import os
-from pathlib import Path
-
+import pytz
+import datetime
+from django.utils import timezone
 import pymysql
+from pathlib import Path
+import os
+
+
+now = timezone.now()
 pymysql.install_as_MySQLdb()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -92,28 +96,29 @@ WSGI_APPLICATION = 'momoda.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'pokedb',
-#         'USER': 'pokedb',
-#         'PASSWORD': 'Po*l6K12e-2208-15',
-#         'HOST': 'mysql.ocio.monash.edu',
-#         'PORT': '3306'
-#     }
-# }
-
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'chemistry',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': 'localhost',
-        'PORT': '3306'
+        'ENGINE': 'mysql.connector.django',
+        'NAME': 'pokedb',
+        'USER': 'pokedb',
+        'PASSWORD': 'Po*l6K12e-220815',
+        'HOST': 'mysql.ocio.monash.edu',
+        'PORT': 3306,
+    }
+}
 
-    }}
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'chemistry',
+#         'USER': 'root',
+#         'PASSWORD': '',
+#         'HOST': 'localhost',
+#         'PORT': '3306'
+
+#     }}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
@@ -139,11 +144,10 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
 
-USE_I18N = True
+USE_I18N = False
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)

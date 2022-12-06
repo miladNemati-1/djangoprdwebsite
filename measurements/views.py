@@ -1,13 +1,5 @@
-from cProfile import label
-from cmath import e, log, log10
-from io import BytesIO
-from re import X
-from telnetlib import PRAGMA_HEARTBEAT
-from turtle import color
-from unicodedata import name
+from cmath import e, log
 from django.shortcuts import render, redirect
-from numpy import dtype, integer, size
-from regex import E
 import sqlalchemy
 from experiments.models import Experiment
 import plotly.express as px
@@ -17,35 +9,25 @@ from .models import Measurement, Data, Monomer, Experiment, cta
 from django.contrib.auth.decorators import login_required
 from plotly.offline import plot
 import plotly.graph_objects as go
-import sqlite3
-import mysql.connector
 import datetime
 import pandas
-import pymysql as mdb
-import matplotlib
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-import base64
-from io import BytesIO
-import plotly as p
 import plotly.graph_objects as go
 import numpy as np
-import mpl_toolkits.mplot3d
+from sklearn.model_selection import train_test_split
 from django.views.decorators.csrf import csrf_exempt
-import math
 from scipy import stats
-from sklearn import tree
-from sklearn.datasets import load_iris
-from sklearn.utils import Bunch
-import sklearn
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.tree import DecisionTreeRegressor
-from keras.models import Sequential
-from keras.layers import Dense
-from keras.utils import np_utils
-import threading
-import statsmodels
+from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import make_scorer
+from sklearn.metrics import r2_score
+from sklearn.model_selection import LeaveOneOut
+import plotly.graph_objects as go
+from plotly.graph_objs.layout import XAxis
+from summit.domain import *
+from summit.strategies import TSEMO
+from summit.utils.dataset import DataSet
 
 
 def get_all_rate_data():
@@ -56,6 +38,10 @@ def get_all_rate_data():
 
     df_measurement_rate = df_measurement_rate.set_index('rate_measurement_join_column').join(
         df_experiments_cta_join.set_index('rate_measurement_join_column'))
+
+    df_measurement_rate.drop(
+        ['res_time', 'result', 'id'], axis=1, inplace=True)
+    df_measurement_rate = df_measurement_rate.drop_duplicates()
 
     return df_measurement_rate
 
@@ -112,6 +98,7 @@ def determine_rate_of_data_subset(data_subset):
 
 @csrf_exempt
 def add_experiment_rate_values_column(df_measurements: pandas.DataFrame):
+
     measurement_id_rate_arr = []
     unique_data_set = set(
         list(df_measurements['rate_measurement_join_column']))
@@ -212,19 +199,114 @@ def all_visualisations(request):
     return render(request, "measurements/all_visualisations.html", context)
 
 
-def create_descision_tree_from_df(df):
+def give_error_of_model():
+    return
+
+
+def take_average_of_items_in_list(list):
+    return sum(list)/len(list)
+
+
+def leave_one_out(X, Y):
+    regressor = DecisionTreeRegressor(random_state=0)
+    leave = LeaveOneOut()
+    average_axis = []
+    x1_axis = []
+    x2_axis = []
+    x3_axis = []
+    y_axis = []
+    i = 0
+    for train_index, test_index in leave.split(X):
+        X_train, X_test = X[train_index], X[test_index]
+        y_train, y_test = Y[train_index], Y[test_index]
+        current_model = regressor.fit(X_train, y_train)
+        Y_pred = current_model.predict(X_test)
+        error_tree_meansquared = np.sqrt(mean_squared_error(y_test, Y_pred))
+        i += 1
+        X_test = list(X_test.flatten().astype(np.float))
+        x1_axis.append(X_test[0])
+        x2_axis.append(X_test[1])
+        x3_axis.append(X_test[2])
+        y_test = list(y_test.flatten().astype(np.float))
+
+        average = take_average_of_items_in_list(X_test)
+        average_axis.append(average)
+        y_axis.append(error_tree_meansquared)
+
+    layout = go.Layout(
+        title="Double X Axis Example",
+        xaxis=XAxis(
+            title="Celcius"
+        ),
+        xaxis2=XAxis(
+            title="Fahrenheits",
+            overlaying='x',
+            side='top',
+        ),
+        yaxis=dict(
+            title="Y values"
+        ),
+    )
+
+    # Create figure with secondary x-axis
+    fig = px.scatter()
+    fig.add_scatter(x=average_axis, y=y_axis, mode='markers')
+
+    # Add traces
+
+    fig.add_scatter(x=x1_axis, y=y_axis, mode='markers')
+    fig.add_scatter(x=x2_axis, y=y_axis, mode='markers')
+
+    fig.add_scatter(x=x3_axis, y=y_axis, mode='markers')
+
+    fig.show()
+
+    return
+
+
+def create_descision_tree_from_df(df: pandas.DataFrame):
     X = df.iloc[:, :-1].values
     Y = df.iloc[:, -1].values.reshape(-1, 1)
-    X_train, X_test, Y_train, Y_test = train_test_split(
-        X, Y, test_size=.2, random_state=41)
-    regressor = DecisionTreeRegressor(min_samples_split=3)
+    df.to_csv("/Users/miladnemati/Desktop/mllml.csv")
 
+    X_train, X_test, Y_train, Y_test = train_test_split(
+        X, Y, test_size=.2, random_state=0)
+    regressor = DecisionTreeRegressor(random_state=0)
+    # leave_one_out(X, Y)
+
+    domain = Domain()
+    domain += ContinuousVariable(name='temperature',
+                                 description='reaction temperature in celsius', bounds=[50, 120])
+    domain += ContinuousVariable(name='cta_concentration',
+                                 description='conc', bounds=[0.001, 0.5])
+
+    print(df)
+    columns = list(df.head())
+    values = {("temperature", "DATA"): list(
+        df['temperature']), ("cta_concentration", "DATA"): list(df['cta_concentration'])}
+    previous_results = DataSet([values], columns=columns)
+    print(columns)
+    strategy = TSEMO(domain)
+    result = strategy.suggest_experiments(1, prev_res=previous_results)
+    print(result)
     kinetics_model = regressor.fit(X_train, Y_train)
+
     Y_pred = regressor.predict(X_test)
-    print(X_train[0])
-    print(Y_train[0])
+
+    scoring = make_scorer(r2_score)
+    g_cv = GridSearchCV(DecisionTreeRegressor(random_state=0),
+                        param_grid={'min_samples_split': range(2, 10)},
+                        scoring=scoring, cv=10, refit=True)
+
+    g_cv.fit(X_train, Y_train)
+    g_cv.best_params_
+
+    result = g_cv.cv_results_
+
+    r2_score(Y_test, g_cv.best_estimator_.predict(X_test))
 
     error_tree_meansquared = np.sqrt(mean_squared_error(Y_test, Y_pred))
+
     return [kinetics_model, error_tree_meansquared]
 
 
@@ -242,10 +324,14 @@ def monomer_models(request):
 
     # df_experiments_cta_join.dropna(subset=['rate'], inplace=True)
 
-    data_target = df_experiments_cta_join[['temperature',	'cta_concentration', 'monomer_Mw', 'monomer_density_g_per_ml', 'monomer_boiling_point_celsius', 'monomer_vapour_pressure_kPa',
-                                           'monomer_viscosity_cP', 'monomer_c_number', 'cta_Mw_cta', 'cta_density_g_per_ml_cta', 'cta_reflective_index_cta', 'cta_boiling_point_c_cta', 'cta_c_number_cta', 'rate']]
-    model = create_descision_tree_from_df(data_target)[0]
-    squared_error = create_descision_tree_from_df(data_target)[1]
+    # data_target = df_experiments_cta_join[['temperature',	'cta_concentration', 'monomer_Mw', 'monomer_density_g_per_ml', 'monomer_boiling_point_celsius', 'monomer_vapour_pressure_kPa',
+    #                                        'monomer_viscosity_cP', 'monomer_c_number', 'cta_Mw_cta', 'cta_density_g_per_ml_cta', 'cta_reflective_index_cta', 'cta_boiling_point_c_cta', 'cta_c_number_cta', 'rate']]
+
+    data_target = df_experiments_cta_join[[
+        'temperature',	 'monomer_Mw', 'cta_concentration',  'rate']]
+    descision_tree = create_descision_tree_from_df(data_target)
+    model = descision_tree[0]
+    squared_error = descision_tree[1]
 
     if request.method == 'POST':
         temp = request.POST.get("r_temp")
@@ -285,8 +371,8 @@ def csv_to_db(file, pk):
                      'tres': 'res_time'}, inplace=True)
     data_conv['measurement_id'] = pk
 
-    con = sqlalchemy.create_engine("mysql+mysqldb://root@localhost/chemistry")
-    con = con.connect()
+    # con = sqlalchemy.create_engine("mysql+mysqldb://root@localhost/chemistry")
+    # con = con.connect()
 
     data_conv.to_sql('measurements_data', con,
                      if_exists='append', index=False, method='multi')
@@ -484,7 +570,6 @@ def view_3d_kinetic_graph(request, name):
 
     temperature, y, z, cx_ratio, CTA = get_axis(list_data)
     data = get_axis_data(list_data)
-    print(cx_ratio)
 
     df = pandas.DataFrame(data)
     k = "rate constant"
@@ -503,7 +588,6 @@ def view_3d_kinetic_graph(request, name):
         Temperature_chosen = request.POST.get("temperature")
         cx_ratio_chosen = request.POST.get("cta_concentration")
         order_chosen = request.POST.get("order")
-        print(cx_ratio_chosen)
         df.to_csv("/Users/miladnemati/Desktop/to_chose_from.csv")
 
         df = df.loc[(df['temperature(C)'] == float(Temperature_chosen)) & (
